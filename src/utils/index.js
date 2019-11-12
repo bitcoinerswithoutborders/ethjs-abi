@@ -16,7 +16,7 @@ function stripZeros(aInput) {
   var first = a[0]; // eslint-disable-line
   while (a.length > 0 && first.toString() === '0') {
     a = a.slice(1);
-    first = a[0];
+    [first] = a;
   }
   return a;
 }
@@ -25,11 +25,11 @@ function bnToBuffer(bnInput) {
   var bn = bnInput; // eslint-disable-line
   var hex = bn.toString(16); // eslint-disable-line
   if (hex.length % 2) { hex = `0${hex}`; }
-  return stripZeros(new Buffer(hex, 'hex'));
+  return stripZeros(Buffer.from(hex, 'hex'));
 }
 
 function isHexString(value, length) {
-  if (typeof(value) !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
+  if (typeof (value) !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
     return false;
   }
   if (length && value.length !== 2 + 2 * length) { return false; }
@@ -48,16 +48,16 @@ function hexOrBuffer(valueInput, name) {
 
     value = value.substring(2);
     if (value.length % 2) { value = `0${value}`; }
-    value = new Buffer(value, 'hex');
+    value = Buffer.from(value, 'hex');
   }
 
   return value;
 }
 
 function hexlify(value) {
-  if (typeof(value) === 'number') {
+  if (typeof (value) === 'number') {
     return `0x${bnToBuffer(new BN(value)).toString('hex')}`;
-  } else if (value.mod || value.modulo) {
+  } if (value.mod || value.modulo) {
     return `0x${bnToBuffer(value).toString('hex')}`;
   } else { // eslint-disable-line
     return `0x${hexOrBuffer(value).toString('hex')}`;
@@ -74,7 +74,7 @@ function getKeys(params, key, allowEmpty) {
     var value = params[i][key];  // eslint-disable-line
     if (allowEmpty && !value) {
       value = '';
-    } else if (typeof(value) !== 'string') {
+    } else if (typeof (value) !== 'string') {
       throw new Error('[ethjs-abi] while getKeys found invalid ABI data structure, type value not string');
     }
     result.push(value);
@@ -91,11 +91,11 @@ function coderNumber(size, signed) {
       if (typeof value === 'object'
         && value.toString
         && (value.toTwos || value.dividedToIntegerBy)) {
-        value = (value.toString(10)).split('.')[0];
+        [value] = (value.toString(10)).split('.');
       }
 
       if (typeof value === 'string' || typeof value === 'number') {
-        value = String(value).split('.')[0];
+        [value] = String(value).split('.');
       }
 
       value = numberToBN(value);
@@ -143,7 +143,7 @@ function coderFixedBytes(length) {
 
       if (value.length === 32) { return value; }
 
-      var result = new Buffer(32); // eslint-disable-line
+      var result = Buffer.alloc(32); // eslint-disable-line
       result.fill(0);
       value.copy(result);
       return result;
@@ -162,7 +162,7 @@ function coderFixedBytes(length) {
 const coderAddress = {
   encode: function encodeAddress(valueInput) {
     var value = valueInput; // eslint-disable-line
-    var result = new Buffer(32); // eslint-disable-line
+    var result = Buffer.alloc(32); // eslint-disable-line
     if (!isHexString(value, 20)) { throw new Error('[ethjs-abi] while encoding address, invalid address value, not alphanumeric 20 byte hex string'); }
     value = hexOrBuffer(value);
     result.fill(0);
@@ -186,7 +186,7 @@ const coderAddress = {
 
 function encodeDynamicBytesHelper(value) {
   var dataLength = parseInt(32 * Math.ceil(value.length / 32)); // eslint-disable-line
-  var padding = new Buffer(dataLength - value.length); // eslint-disable-line
+  var padding = Buffer.alloc(dataLength - value.length); // eslint-disable-line
   padding.fill(0);
 
   return Buffer.concat([
@@ -223,7 +223,7 @@ const coderDynamicBytes = {
 
 const coderString = {
   encode: function encodeString(value) {
-    return encodeDynamicBytesHelper(new Buffer(value, 'utf8'));
+    return encodeDynamicBytesHelper(Buffer.from(value, 'utf8'));
   },
   decode: function decodeString(data, offset) {
     var result = decodeDynamicBytesHelper(data, offset); // eslint-disable-line
@@ -236,7 +236,7 @@ const coderString = {
 function coderArray(coder, lengthInput) {
   return {
     encode: function encodeArray(value) {
-      var result = new Buffer(0); // eslint-disable-line
+      var result = Buffer.alloc(0); // eslint-disable-line
       var length = lengthInput; // eslint-disable-line
 
       if (!Array.isArray(value)) { throw new Error('[ethjs-abi] while encoding array, invalid array data, not type Object (Array)'); }

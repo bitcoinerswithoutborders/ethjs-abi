@@ -1,11 +1,11 @@
-const assert = require('chai').assert;
-const utils = require('../utils/index.js');
+const { assert } = require('chai'); // eslint-disable-line import/no-extraneous-dependencies
 const BN = require('bn.js');
+const utils = require('../utils/index.js');
 
 describe('test utilty methods', () => {
   describe('stripZeros', () => {
     it('should strip zeros from buffer', () => {
-      assert.deepEqual(utils.stripZeros(new Buffer('000001', 'hex')), new Buffer('01', 'hex'));
+      assert.deepEqual(utils.stripZeros(Buffer.from('000001', 'hex')), Buffer.from('01', 'hex'));
     });
 
     it('should throw while stripping String', () => {
@@ -15,7 +15,7 @@ describe('test utilty methods', () => {
 
   describe('bnToBuffer', () => {
     it('bnToBuffer', () => {
-      assert.deepEqual(utils.bnToBuffer(new BN(10)), (new Buffer(`0${(new BN(10)).toString(16)}`, 'hex')));
+      assert.deepEqual(utils.bnToBuffer(new BN(10)), (Buffer.from(`0${(new BN(10)).toString(16)}`, 'hex')));
     });
   });
 
@@ -130,7 +130,7 @@ describe('test utilty methods', () => {
 
   describe('hexOrBuffer', () => {
     it('uneven hex should pad', () => {
-      assert.deepEqual(utils.hexOrBuffer('0xa'), new Buffer('0a', 'hex'));
+      assert.deepEqual(utils.hexOrBuffer('0xa'), Buffer.from('0a', 'hex'));
     });
   });
 

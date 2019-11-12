@@ -1,7 +1,7 @@
-const assert = require('chai').assert;
+const { assert } = require('chai'); // eslint-disable-line import/no-extraneous-dependencies
+const BN = require('bn.js');
 const abi = require('../index.js');
 const contracts = require('./contracts.json');
-const BN = require('bn.js');
 
 describe('test basic encoding and decoding functionality', () => {
   const interfaceABI = [
